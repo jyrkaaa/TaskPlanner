@@ -23,7 +23,7 @@ public class TenantUsersEntity {
     private UserEntity user;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_role", nullable = false)
+    @JoinColumn(name = "role_id", nullable = false)
     private RoleEntity role;
 
     @Column(name = "created_at", nullable = false)

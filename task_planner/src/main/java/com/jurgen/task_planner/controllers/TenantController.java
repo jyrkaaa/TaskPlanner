@@ -41,26 +41,26 @@ public class TenantController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/{tenantId}/users/{userId}/accept")
+    @PostMapping("/{tenantId}/accept/{userId}")
     public ResponseEntity<Void> acceptUser(@PathVariable int tenantId,
                                            @PathVariable int userId) throws HttpErrorException {
-        if (!SecurityUtils.isAdminInTenant(tenantId)) return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        if (!SecurityUtils.isAdminInTenant(tenantId)) throw new HttpErrorException("Only tenant admins can accept users", HttpStatus.FORBIDDEN);
 
         tenantService.acceptUser(tenantId, userId);
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/{tenantId}/users/{userId}/reject")
+    @PostMapping("/{tenantId}/reject/{userId}")
     public ResponseEntity<Void> rejectUser(@PathVariable int tenantId,
                                            @PathVariable int userId) throws HttpErrorException {
-        if (!SecurityUtils.isAdminInTenant(tenantId)) return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        if (!SecurityUtils.isAdminInTenant(tenantId)) throw new HttpErrorException("Only tenant admins can reject users", HttpStatus.FORBIDDEN);
         tenantService.rejectUser(tenantId, userId);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{tenantId}/members")
     public ResponseEntity<List<TenantMemberDto>> getTenantMembers(@PathVariable int tenantId) throws HttpErrorException {
-        if (!SecurityUtils.isMemberOfTenant(tenantId)) return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        if (!SecurityUtils.isMemberOfTenant(tenantId)) throw new HttpErrorException("Only tenant members can view members", HttpStatus.FORBIDDEN);
         return ResponseEntity.ok(tenantService.getTenantMembers(tenantId));
     }
 }

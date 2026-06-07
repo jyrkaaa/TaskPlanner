@@ -22,7 +22,7 @@ CREATE TABLE roles (
 CREATE TABLE tenant_users (
     tenant_id INT NOT NULL REFERENCES tenants(id),
     user_id   INT NOT NULL REFERENCES users(id),
-    user_role INT NOT NULL DEFAULT 0 REFERENCES roles(id),
+    role_id INT NOT NULL DEFAULT 1 REFERENCES roles(id),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     PRIMARY KEY ( user_id, tenant_id)
 );
