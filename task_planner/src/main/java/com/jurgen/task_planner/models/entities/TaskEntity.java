@@ -18,6 +18,10 @@ public class TaskEntity {
     @JoinColumn(name = "issue_id", nullable = false)
     private IssueEntity issue;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "task_status_id", nullable = false)
+    private TaskStatusEntity taskStatus;
+
     @Column
     private String code;
 
@@ -43,22 +47,25 @@ public class TaskEntity {
         updatedAt = OffsetDateTime.now();
     }
 
-    public static TaskEntity create(IssueEntity issue, String code, String description) {
+    public static TaskEntity create(IssueEntity issue, TaskStatusEntity taskStatus, String code, String description) {
         TaskEntity e = new TaskEntity();
         e.issue = issue;
+        e.taskStatus = taskStatus;
         e.code = code;
         e.description = description;
         return e;
     }
 
-    public int getId()              { return id; }
-    public IssueEntity getIssue()    { return issue; }
-    public String getCode()          { return code; }
-    public String getDescription()   { return description; }
-    public OffsetDateTime getCreatedAt()       { return createdAt; }
-    public OffsetDateTime getUpdatedAt()       { return updatedAt; }
-    public List<TaskUsersEntity> getTaskUsers(){ return taskUsers; }
+    public int getId()                   { return id; }
+    public IssueEntity getIssue()        { return issue; }
+    public TaskStatusEntity getTaskStatus() { return taskStatus; }
+    public String getCode()              { return code; }
+    public String getDescription()       { return description; }
+    public OffsetDateTime getCreatedAt() { return createdAt; }
+    public OffsetDateTime getUpdatedAt() { return updatedAt; }
+    public List<TaskUsersEntity> getTaskUsers() { return taskUsers; }
 
+    public void setTaskStatus(TaskStatusEntity taskStatus) { this.taskStatus = taskStatus; }
     public void setCode(String code)               { this.code = code; }
     public void setDescription(String description) { this.description = description; }
 }

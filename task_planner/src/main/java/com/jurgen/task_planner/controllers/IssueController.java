@@ -29,7 +29,7 @@ public class IssueController extends BaseTenantController {
 
     @GetMapping("/{issueId}")
     public ResponseEntity<IssueDto> getIssue(@PathVariable int tenantId,
-                                             @PathVariable long issueId) throws HttpErrorException {
+                                             @PathVariable int issueId) throws HttpErrorException {
         resolveTenant(tenantId);
         return ResponseEntity.ok(issueService.getIssue(tenantId, issueId));
     }
@@ -43,7 +43,7 @@ public class IssueController extends BaseTenantController {
 
     @PutMapping("/{issueId}")
     public ResponseEntity<IssueDto> updateIssue(@PathVariable int tenantId,
-                                                @PathVariable long issueId,
+                                                @PathVariable int issueId,
                                                 @RequestBody UpdateIssueRequest request) throws HttpErrorException {
         resolveTenant(tenantId);
         return ResponseEntity.ok(issueService.updateIssue(tenantId, issueId, request));
@@ -51,7 +51,7 @@ public class IssueController extends BaseTenantController {
 
     @DeleteMapping("/{issueId}")
     public ResponseEntity<Void> deleteIssue(@PathVariable int tenantId,
-                                            @PathVariable long issueId) throws HttpErrorException {
+                                            @PathVariable int issueId) throws HttpErrorException {
         resolveTenant(tenantId);
         issueService.deleteIssue(tenantId, issueId);
         return ResponseEntity.noContent().build();

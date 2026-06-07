@@ -6,6 +6,8 @@ import java.util.List;
 public record TaskDto(
     long id,
     long issueId,
+    int statusId,
+    String statusName,
     String code,
     String description,
     List<TaskAssigneeDto> assignees,

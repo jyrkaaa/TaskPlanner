@@ -6,14 +6,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.jurgen.task_planner.models.auth.SecurityUtils;
 import com.jurgen.task_planner.models.dtos.HttpErrorException;
 import com.jurgen.task_planner.models.dtos.TaskDto;
 import com.jurgen.task_planner.models.dtos.TaskResponsibilityDto;
+import com.jurgen.task_planner.models.dtos.TaskStatusDto;
 import com.jurgen.task_planner.models.requests.AssignTaskUserRequest;
 import com.jurgen.task_planner.models.requests.CreateTaskRequest;
 import com.jurgen.task_planner.models.requests.CreateTaskResponsibilityRequest;
+import com.jurgen.task_planner.models.requests.CreateTaskStatusRequest;
 import com.jurgen.task_planner.models.requests.UpdateTaskRequest;
+import com.jurgen.task_planner.models.requests.UpdateTaskStatusRequest;
 import com.jurgen.task_planner.services.ITaskService;
 
 import lombok.RequiredArgsConstructor;
@@ -107,6 +109,37 @@ public class TaskController extends BaseTenantController {
     public ResponseEntity<Void> deleteResponsibility(@PathVariable int tenantId,
                                                      @PathVariable int responsibilityId) throws HttpErrorException {
         taskService.deleteResponsibility(tenantId, responsibilityId);
+        return ResponseEntity.noContent().build();
+    }
+
+    // ── Task statuses ────────────────────────────────────────────────────────
+
+    @GetMapping("/task-statuses")
+    public ResponseEntity<List<TaskStatusDto>> getStatuses(@PathVariable int tenantId) throws HttpErrorException {
+        resolveTenant(tenantId);
+        return ResponseEntity.ok(taskService.getStatuses(tenantId));
+    }
+
+    @PostMapping("/task-statuses")
+    public ResponseEntity<TaskStatusDto> createStatus(@PathVariable int tenantId,
+                                                      @RequestBody CreateTaskStatusRequest request) throws HttpErrorException {
+        resolveTenant(tenantId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(taskService.createStatus(tenantId, request));
+    }
+
+    @PutMapping("/task-statuses/{statusId}")
+    public ResponseEntity<TaskStatusDto> updateStatus(@PathVariable int tenantId,
+                                                      @PathVariable int statusId,
+                                                      @RequestBody UpdateTaskStatusRequest request) throws HttpErrorException {
+        resolveTenant(tenantId);
+        return ResponseEntity.ok(taskService.updateStatus(tenantId, statusId, request));
+    }
+
+    @DeleteMapping("/task-statuses/{statusId}")
+    public ResponseEntity<Void> deleteStatus(@PathVariable int tenantId,
+                                             @PathVariable int statusId) throws HttpErrorException {
+        resolveTenant(tenantId);
+        taskService.deleteStatus(tenantId, statusId);
         return ResponseEntity.noContent().build();
     }
 }

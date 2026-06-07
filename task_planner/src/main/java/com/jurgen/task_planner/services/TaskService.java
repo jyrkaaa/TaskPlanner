@@ -10,19 +10,24 @@ import com.jurgen.task_planner.models.dtos.HttpErrorException;
 import com.jurgen.task_planner.models.dtos.TaskAssigneeDto;
 import com.jurgen.task_planner.models.dtos.TaskDto;
 import com.jurgen.task_planner.models.dtos.TaskResponsibilityDto;
+import com.jurgen.task_planner.models.dtos.TaskStatusDto;
 import com.jurgen.task_planner.models.entities.IssueEntity;
 import com.jurgen.task_planner.models.entities.TaskEntity;
 import com.jurgen.task_planner.models.entities.TaskResponsibilityEntity;
+import com.jurgen.task_planner.models.entities.TaskStatusEntity;
 import com.jurgen.task_planner.models.entities.TaskUsersEntity;
 import com.jurgen.task_planner.models.entities.auth.TenantEntity;
 import com.jurgen.task_planner.models.entities.auth.UserEntity;
 import com.jurgen.task_planner.models.requests.AssignTaskUserRequest;
 import com.jurgen.task_planner.models.requests.CreateTaskRequest;
 import com.jurgen.task_planner.models.requests.CreateTaskResponsibilityRequest;
+import com.jurgen.task_planner.models.requests.CreateTaskStatusRequest;
 import com.jurgen.task_planner.models.requests.UpdateTaskRequest;
+import com.jurgen.task_planner.models.requests.UpdateTaskStatusRequest;
 import com.jurgen.task_planner.repositories.IssueRepository;
 import com.jurgen.task_planner.repositories.TaskRepository;
 import com.jurgen.task_planner.repositories.TaskResponsibilityRepository;
+import com.jurgen.task_planner.repositories.TaskStatusRepository;
 import com.jurgen.task_planner.repositories.TenantRepository;
 import com.jurgen.task_planner.repositories.TenantUsersRepository;
 import com.jurgen.task_planner.repositories.UserJpaRepository;
@@ -33,12 +38,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TaskService implements ITaskService {
 
-    private final TaskRepository             _taskRepository;
-    private final IssueRepository            _issueRepository;
+    private final TaskRepository              _taskRepository;
+    private final IssueRepository             _issueRepository;
     private final TaskResponsibilityRepository _responsibilityRepository;
-    private final TenantRepository           _tenantRepository;
-    private final TenantUsersRepository      _tenantUsersRepository;
-    private final UserJpaRepository          _userRepository;
+    private final TaskStatusRepository        _taskStatusRepository;
+    private final TenantRepository            _tenantRepository;
+    private final TenantUsersRepository       _tenantUsersRepository;
+    private final UserJpaRepository           _userRepository;
+
+    // ── Tasks ────────────────────────────────────────────────────────────────
 
     @Override
     public List<TaskDto> getTasksForIssue(int tenantId, int issueId) throws HttpErrorException {
@@ -56,7 +64,8 @@ public class TaskService implements ITaskService {
     @Transactional
     public TaskDto createTask(int tenantId, int issueId, CreateTaskRequest request) throws HttpErrorException {
         IssueEntity issue = requireIssue(tenantId, issueId);
-        return toDto(_taskRepository.save(TaskEntity.create(issue, request.code(), request.description())));
+        TaskStatusEntity status = requireStatus(tenantId, request.statusId());
+        return toDto(_taskRepository.save(TaskEntity.create(issue, status, request.code(), request.description())));
     }
 
     @Override
@@ -66,6 +75,9 @@ public class TaskService implements ITaskService {
         TaskEntity task = requireTask(issueId, taskId);
         task.setCode(request.code());
         task.setDescription(request.description());
+        if (request.statusId() != null) {
+            task.setTaskStatus(requireStatus(tenantId, request.statusId()));
+        }
         return toDto(_taskRepository.save(task));
     }
 
@@ -76,13 +88,14 @@ public class TaskService implements ITaskService {
         _taskRepository.delete(requireTask(issueId, taskId));
     }
 
+    // ── Task user assignment ─────────────────────────────────────────────────
+
     @Override
     @Transactional
     public void assignUser(int tenantId, int issueId, int taskId, AssignTaskUserRequest request) throws HttpErrorException {
         requireIssue(tenantId, issueId);
         TaskEntity task = requireTask(issueId, taskId);
 
-        // user must be an accepted member of the tenant
         _tenantUsersRepository.findByTenantIdAndUserId(tenantId, request.userId())
             .filter(tu -> tu.isAccepted())
             .orElseThrow(() -> new HttpErrorException("User is not an accepted member of this tenant", HttpStatus.BAD_REQUEST));
@@ -91,7 +104,7 @@ public class TaskService implements ITaskService {
             .orElseThrow(() -> new HttpErrorException("User not found", HttpStatus.NOT_FOUND));
 
         TaskResponsibilityEntity responsibility = _responsibilityRepository.findById(request.responsibilityId())
-            .filter(r -> r.getTenant().getId().equals(tenantId))
+            .filter(r -> r.getTenant().getId() == tenantId)
             .orElseThrow(() -> new HttpErrorException("Responsibility not found in this tenant", HttpStatus.NOT_FOUND));
 
         boolean alreadyAssigned = task.getTaskUsers().stream()
@@ -115,6 +128,8 @@ public class TaskService implements ITaskService {
         }
         _taskRepository.save(task);
     }
+
+    // ── Task responsibilities ────────────────────────────────────────────────
 
     @Override
     public List<TaskResponsibilityDto> getResponsibilities(int tenantId) {
@@ -146,6 +161,58 @@ public class TaskService implements ITaskService {
         _responsibilityRepository.delete(responsibility);
     }
 
+    // ── Task statuses ────────────────────────────────────────────────────────
+
+    @Override
+    public List<TaskStatusDto> getStatuses(int tenantId) {
+        return _taskStatusRepository.findAllByTenantIdOrdered(tenantId).stream()
+            .map(this::toStatusDto)
+            .toList();
+    }
+
+    @Override
+    @Transactional
+    public TaskStatusDto createStatus(int tenantId, CreateTaskStatusRequest request) throws HttpErrorException {
+        if (request.name() == null || request.name().isBlank()) {
+            throw new HttpErrorException("Name is required", HttpStatus.BAD_REQUEST);
+        }
+        if (request.orderNr() <= 0) {
+            throw new HttpErrorException("Order must be a positive integer", HttpStatus.BAD_REQUEST);
+        }
+        TenantEntity tenant = _tenantRepository.findById(tenantId)
+            .orElseThrow(() -> new HttpErrorException("Tenant not found", HttpStatus.NOT_FOUND));
+        return toStatusDto(_taskStatusRepository.save(
+            TaskStatusEntity.create(tenant, request.name(), request.orderNr())
+        ));
+    }
+
+    @Override
+    @Transactional
+    public TaskStatusDto updateStatus(int tenantId, int statusId, UpdateTaskStatusRequest request) throws HttpErrorException {
+        if (request.name() == null || request.name().isBlank()) {
+            throw new HttpErrorException("Name is required", HttpStatus.BAD_REQUEST);
+        }
+        if (request.orderNr() <= 0) {
+            throw new HttpErrorException("Order must be a positive integer", HttpStatus.BAD_REQUEST);
+        }
+        TaskStatusEntity status = requireStatus(tenantId, statusId);
+        status.setName(request.name());
+        status.setOrderNr(request.orderNr());
+        return toStatusDto(_taskStatusRepository.save(status));
+    }
+
+    @Override
+    @Transactional
+    public void deleteStatus(int tenantId, int statusId) throws HttpErrorException {
+        TaskStatusEntity status = requireStatus(tenantId, statusId);
+        if (_taskRepository.countByTaskStatusId(statusId) > 0) {
+            throw new HttpErrorException("Cannot delete status: it is assigned to one or more tasks", HttpStatus.CONFLICT);
+        }
+        _taskStatusRepository.delete(status);
+    }
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
+
     private IssueEntity requireIssue(int tenantId, int issueId) throws HttpErrorException {
         return _issueRepository.findByIdAndTenantId(issueId, tenantId)
             .orElseThrow(() -> new HttpErrorException("Issue not found", HttpStatus.NOT_FOUND));
@@ -154,6 +221,16 @@ public class TaskService implements ITaskService {
     private TaskEntity requireTask(int issueId, int taskId) throws HttpErrorException {
         return _taskRepository.findByIdAndIssueId(taskId, issueId)
             .orElseThrow(() -> new HttpErrorException("Task not found", HttpStatus.NOT_FOUND));
+    }
+
+    private TaskStatusEntity requireStatus(int tenantId, int statusId) throws HttpErrorException {
+        return _taskStatusRepository.findById(statusId)
+            .filter(s -> s.getTenant().getId() == tenantId)
+            .orElseThrow(() -> new HttpErrorException("Status not found in this tenant", HttpStatus.NOT_FOUND));
+    }
+
+    private TaskStatusDto toStatusDto(TaskStatusEntity s) {
+        return new TaskStatusDto(s.getId(), s.getName(), s.getOrderNr());
     }
 
     private TaskDto toDto(TaskEntity t) {
@@ -165,6 +242,11 @@ public class TaskService implements ITaskService {
                 tu.getResponsibility().getName()
             ))
             .toList();
-        return new TaskDto(t.getId(), t.getIssue().getId(), t.getCode(), t.getDescription(), assignees, t.getCreatedAt(), t.getUpdatedAt());
+        return new TaskDto(
+            t.getId(), t.getIssue().getId(),
+            t.getTaskStatus().getId(), t.getTaskStatus().getName(),
+            t.getCode(), t.getDescription(),
+            assignees, t.getCreatedAt(), t.getUpdatedAt()
+        );
     }
 }

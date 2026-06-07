@@ -32,7 +32,7 @@ public class IssueService implements IIssueService {
     }
 
     @Override
-    public IssueDto getIssue(int tenantId, long issueId) throws HttpErrorException {
+    public IssueDto getIssue(int tenantId, int issueId) throws HttpErrorException {
         return toDto(requireIssue(tenantId, issueId));
     }
 
@@ -52,7 +52,7 @@ public class IssueService implements IIssueService {
 
     @Override
     @Transactional
-    public IssueDto updateIssue(int tenantId, long issueId, UpdateIssueRequest request) throws HttpErrorException {
+    public IssueDto updateIssue(int tenantId, int issueId, UpdateIssueRequest request) throws HttpErrorException {
         if (request.code() == null || request.code().isBlank()) {
             throw new HttpErrorException("Code is required", HttpStatus.BAD_REQUEST);
         }
@@ -66,11 +66,11 @@ public class IssueService implements IIssueService {
 
     @Override
     @Transactional
-    public void deleteIssue(int tenantId, long issueId) throws HttpErrorException {
+    public void deleteIssue(int tenantId, int issueId) throws HttpErrorException {
         _issueRepository.delete(requireIssue(tenantId, issueId));
     }
 
-    private IssueEntity requireIssue(int tenantId, long issueId) throws HttpErrorException {
+    private IssueEntity requireIssue(int tenantId, int issueId) throws HttpErrorException {
         return _issueRepository.findByIdAndTenantId(issueId, tenantId)
             .orElseThrow(() -> new HttpErrorException("Issue not found", HttpStatus.NOT_FOUND));
     }

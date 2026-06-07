@@ -9,11 +9,14 @@ import org.springframework.data.repository.query.Param;
 
 import com.jurgen.task_planner.models.entities.TaskEntity;
 
-public interface TaskRepository extends JpaRepository<TaskEntity, Long> {
+public interface TaskRepository extends JpaRepository<TaskEntity, Integer> {
 
     @Query("SELECT t FROM TaskEntity t WHERE t.issue.id = :issueId")
-    List<TaskEntity> findAllByIssueId(@Param("issueId") long issueId);
+    List<TaskEntity> findAllByIssueId(@Param("issueId") int issueId);
 
     @Query("SELECT t FROM TaskEntity t WHERE t.id = :id AND t.issue.id = :issueId")
-    Optional<TaskEntity> findByIdAndIssueId(@Param("id") long id, @Param("issueId") long issueId);
+    Optional<TaskEntity> findByIdAndIssueId(@Param("id") int id, @Param("issueId") int issueId);
+
+    @Query("SELECT COUNT(t) FROM TaskEntity t WHERE t.taskStatus.id = :statusId")
+    long countByTaskStatusId(@Param("statusId") int statusId);
 }

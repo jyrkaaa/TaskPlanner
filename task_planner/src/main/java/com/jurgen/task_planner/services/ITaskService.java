@@ -5,10 +5,13 @@ import java.util.List;
 import com.jurgen.task_planner.models.dtos.HttpErrorException;
 import com.jurgen.task_planner.models.dtos.TaskDto;
 import com.jurgen.task_planner.models.dtos.TaskResponsibilityDto;
+import com.jurgen.task_planner.models.dtos.TaskStatusDto;
 import com.jurgen.task_planner.models.requests.AssignTaskUserRequest;
 import com.jurgen.task_planner.models.requests.CreateTaskRequest;
 import com.jurgen.task_planner.models.requests.CreateTaskResponsibilityRequest;
+import com.jurgen.task_planner.models.requests.CreateTaskStatusRequest;
 import com.jurgen.task_planner.models.requests.UpdateTaskRequest;
+import com.jurgen.task_planner.models.requests.UpdateTaskStatusRequest;
 
 public interface ITaskService {
     List<TaskDto> getTasksForIssue(int tenantId, int issueId) throws HttpErrorException;
@@ -22,4 +25,9 @@ public interface ITaskService {
     List<TaskResponsibilityDto> getResponsibilities(int tenantId);
     TaskResponsibilityDto createResponsibility(int tenantId, CreateTaskResponsibilityRequest request) throws HttpErrorException;
     void deleteResponsibility(int tenantId, int responsibilityId) throws HttpErrorException;
+
+    List<TaskStatusDto> getStatuses(int tenantId);
+    TaskStatusDto createStatus(int tenantId, CreateTaskStatusRequest request) throws HttpErrorException;
+    TaskStatusDto updateStatus(int tenantId, int statusId, UpdateTaskStatusRequest request) throws HttpErrorException;
+    void deleteStatus(int tenantId, int statusId) throws HttpErrorException;
 }

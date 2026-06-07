@@ -14,7 +14,7 @@ public class IssueEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tenant_id", nullable = false)
@@ -49,7 +49,7 @@ public class IssueEntity {
         return e;
     }
 
-    public Long getId()             { return id; }
+    public int getId()             { return id; }
     public TenantEntity getTenant() { return tenant; }
     public String getCode()         { return code; }
     public OffsetDateTime getCreatedAt() { return createdAt; }
