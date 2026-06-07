@@ -1,0 +1,1 @@
+INSERT INTO tenants (name, code, confirmed) VALUES ('Base Tenant', 'BASE', TRUE);

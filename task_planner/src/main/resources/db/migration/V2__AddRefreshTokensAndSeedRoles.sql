@@ -1,0 +1,9 @@
+INSERT INTO roles (name) VALUES ('ROLE_UNACCEPTED'), ('ROLE_USER'), ('ROLE_ADMIN');
+
+CREATE TABLE refresh_tokens (
+    id         SERIAL PRIMARY KEY,
+    token      VARCHAR(255) NOT NULL UNIQUE,
+    user_id    INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    expires_at TIMESTAMPTZ NOT NULL,
+    revoked    BOOLEAN NOT NULL DEFAULT FALSE
+);

@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: task_planner_db
+    environment:
+      POSTGRES_DB: task_planner
+      POSTGRES_USER: task_planner
+      POSTGRES_PASSWORD: task_planner
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U task_planner -d task_planner"]
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
