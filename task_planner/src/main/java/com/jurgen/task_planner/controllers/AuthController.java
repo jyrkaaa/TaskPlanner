@@ -60,7 +60,7 @@ public class AuthController {
     }
 
     @GetMapping("/permissions")
-    public ResponseEntity<List<PermissionsDto>> permissions(@RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<List<PermissionsDto>> permissions() {
         if (!SecurityUtils.isAuthenticated()) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         UserPrincipal principal = (UserPrincipal) userDetailsService.loadUserByUsername(SecurityUtils.getCurrentUserEmail());
         List<PermissionsDto> dto = PermissionsMapper.toDto(principal);

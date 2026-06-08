@@ -41,15 +41,19 @@ public class TenantService implements ITenantService {
     }
 
     @Override
-    public List<TenantDto> getAll() {
-        return _tenantRepository.findAll().stream().map(TenantMapper::toDto).toList();
+    public List<TenantDto> getAllLinkedTenants(int userId) {
+        return _tenantUsersRepository.findAllByUserId(userId).stream()
+            .map(tu -> TenantMapper.toDto(tu.getTenant()))
+            .toList();
     }
 
     @Override
     @Transactional
-    public void createTenant(CreateTenantRequest request) {
+    public void createTenantAndJoinAsAdmin(CreateTenantRequest request, int creatorUserId) throws HttpErrorException {
         TenantEntity tenant = _tenantRepository.save(new TenantEntity(request.name(), request.code()));
-        _tenantRepository.save(tenant);
+        _tenantUsersRepository.save(
+            TenantUsersEntity.create(loadUser(creatorUserId), tenant, loadRole(Constants.Roles.ADMIN))
+        );
     }
 
     @Override

@@ -24,14 +24,13 @@ public class TenantController {
     private final ITenantService tenantService;
 
     @GetMapping
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<List<TenantDto>> getAllTenants() {
-        return ResponseEntity.ok(tenantService.getAll());
+    public ResponseEntity<List<TenantDto>> getAllLinkedTenants() {
+        return ResponseEntity.ok(tenantService.getAllLinkedTenants(SecurityUtils.getCurrentUserId()));
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Void> createTenant(@RequestBody CreateTenantRequest request) throws HttpErrorException {
-        tenantService.createTenant(request);
+    public ResponseEntity<Void> createTenantAndJoinAsAdmin(@RequestBody CreateTenantRequest request) throws HttpErrorException {
+        tenantService.createTenantAndJoinAsAdmin(request, SecurityUtils.getCurrentUserId());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

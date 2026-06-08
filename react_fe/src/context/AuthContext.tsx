@@ -3,7 +3,7 @@ import { api, clearTokens, setTokens } from '../api/client'
 import { PermissionsDto } from '../models/dto/PermissionsDto'
 import { clearPermissions, loadPermissions, savePermissions } from '../utils/permissionsStorage'
 import { AuthResponse } from '../models/dto/AuthRespose'
-import { AuthRequest } from '../models/dto/AuthResponse'
+import { AuthRequest, RegisterRequest } from '../models/dto/AuthRequest'
 import { LocalStorageNames } from '../constants/LocalStorageNames'
 
 interface AuthContextValue {
@@ -12,6 +12,7 @@ interface AuthContextValue {
   loading: boolean;
   login: (authRequest: AuthRequest) => Promise<void>;
   logout: () => void;
+  register: (registerRequest: RegisterRequest) => Promise<void>;
   hasRole: (tenantId: number, role: string) => boolean;
   getTenantRole: (tenantId: number) => string | null;
   chosenTenantId: number | null;
@@ -69,6 +70,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await savePermissions(perms)
   }, [])
 
+  const register = useCallback(async (registerRequest: RegisterRequest) => {
+    const response = await api.post<AuthResponse>('/auth/register', registerRequest);
+    setTokens({ access: response.token, refresh: response.refreshToken })
+    const perms = await api.get<PermissionsDto[]>('/auth/permissions')
+    setPermissions(perms)
+    setIsAuthenticated(true)
+    await savePermissions(perms)
+  }, [])
+
   const logout = useCallback(() => {
     clearTokens()
     clearPermissions()
@@ -97,7 +107,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [permissions]);
 
   return (
-    <AuthContext.Provider value={{ permissions, isAuthenticated, loading, login, logout, hasRole, getTenantRole, chosenTenantId, chooseTenant }}>
+    <AuthContext.Provider value={{ permissions, isAuthenticated, loading, login, logout, register,  hasRole, getTenantRole, chosenTenantId, chooseTenant }}>
       {children}
     </AuthContext.Provider>
   )

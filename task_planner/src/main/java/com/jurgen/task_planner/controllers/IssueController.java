@@ -1,14 +1,14 @@
 package com.jurgen.task_planner.controllers;
 
-import java.util.List;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.jurgen.task_planner.models.dtos.HttpErrorException;
 import com.jurgen.task_planner.models.dtos.IssueDto;
+import com.jurgen.task_planner.models.dtos.PagedResponse;
 import com.jurgen.task_planner.models.requests.CreateIssueRequest;
+import com.jurgen.task_planner.models.requests.PaginationRequest;
 import com.jurgen.task_planner.models.requests.UpdateIssueRequest;
 import com.jurgen.task_planner.services.IIssueService;
 
@@ -21,10 +21,13 @@ public class IssueController extends BaseTenantController {
 
     private final IIssueService issueService;
 
-    @GetMapping
-    public ResponseEntity<List<IssueDto>> getIssues(@PathVariable int tenantId) throws HttpErrorException {
+    @PostMapping("/search")
+    public ResponseEntity<PagedResponse<IssueDto>> getIssues(
+            @PathVariable int tenantId,
+            @RequestBody PaginationRequest request) throws HttpErrorException {
         resolveTenant(tenantId);
-        return ResponseEntity.ok(issueService.getIssuesForTenant(tenantId));
+        PagedResponse<IssueDto> pagedResponse = issueService.getIssuesForTenant(tenantId, request);
+        return ResponseEntity.ok(pagedResponse);
     }
 
     @GetMapping("/{issueId}")

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { AuthRequest } from '../models/dto/AuthResponse'
+import { AuthRequest } from '../models/dto/AuthRequest'
 import { useAlert } from '../context/AlertContext';
 
 interface FormErrors {

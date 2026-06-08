@@ -3,6 +3,8 @@ package com.jurgen.task_planner.repositories;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,6 +15,10 @@ public interface IssueRepository extends JpaRepository<IssueEntity, Integer> {
 
     @Query("SELECT i FROM IssueEntity i WHERE i.tenant.id = :tenantId")
     List<IssueEntity> findAllByTenantId(@Param("tenantId") int tenantId);
+
+    @Query(value = "SELECT i FROM IssueEntity i WHERE i.tenant.id = :tenantId",
+           countQuery = "SELECT count(i) FROM IssueEntity i WHERE i.tenant.id = :tenantId")
+    Page<IssueEntity> findAllByTenantId(@Param("tenantId") int tenantId, Pageable pageable);
 
     @Query("SELECT i FROM IssueEntity i WHERE i.id = :id AND i.tenant.id = :tenantId")
     Optional<IssueEntity> findByIdAndTenantId(@Param("id") int id, @Param("tenantId") int tenantId);
