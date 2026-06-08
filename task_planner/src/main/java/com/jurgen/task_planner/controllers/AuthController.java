@@ -1,12 +1,18 @@
 package com.jurgen.task_planner.controllers;
 
+import com.jurgen.task_planner.models.auth.SecurityUtils;
 import com.jurgen.task_planner.models.dtos.HttpErrorException;
+import com.jurgen.task_planner.models.dtos.PermissionsDto;
 import com.jurgen.task_planner.models.entities.auth.UserPrincipal;
+import com.jurgen.task_planner.models.mappers.PermissionsMapper;
 import com.jurgen.task_planner.services.auth.IJwtService;
 import com.jurgen.task_planner.services.auth.RefreshTokenService;
 import com.jurgen.task_planner.services.auth.RegistrationService;
 import com.jurgen.task_planner.services.auth.RefreshTokenService.RotateResult;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -51,6 +57,14 @@ public class AuthController {
         String accessToken = jwtService.generateToken(principal);
         String refreshToken = refreshTokenService.createForUser(principal.getUserId()).getToken();
         return ResponseEntity.status(HttpStatus.CREATED).body(new TokenResponse(accessToken, refreshToken));
+    }
+
+    @GetMapping("/permissions")
+    public ResponseEntity<List<PermissionsDto>> permissions(@RequestHeader("Authorization") String authHeader) {
+        if (!SecurityUtils.isAuthenticated()) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        UserPrincipal principal = (UserPrincipal) userDetailsService.loadUserByUsername(SecurityUtils.getCurrentUserEmail());
+        List<PermissionsDto> dto = PermissionsMapper.toDto(principal);
+        return ResponseEntity.ok(dto);
     }
 }
 

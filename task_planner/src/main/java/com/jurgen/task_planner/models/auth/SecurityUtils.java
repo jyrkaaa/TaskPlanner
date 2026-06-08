@@ -24,6 +24,10 @@ public final class SecurityUtils {
         return context().userId();
     }
 
+    public static boolean isAuthenticated() {
+        return SecurityContextHolder.getContext().getAuthentication() != null;
+    }
+
     public static String getCurrentUserEmail() {
         return context().email();
     }
@@ -40,7 +44,7 @@ public final class SecurityUtils {
 
     public static boolean isMemberOfTenant(int tenantId) {
         Optional<String> role = getRoleInTenant(tenantId);
-        return role.isPresent() && !role.get().equals(Constants.Roles.UNACCEPTED);
+        return !getRoleInTenant(tenantId).equals(Constants.Roles.UNACCEPTED);
     }
 
     public static boolean isAdminInTenant(int tenantId) {
