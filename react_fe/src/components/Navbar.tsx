@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { PermissionRole } from "../models/dto/PermissionsDto";
 
@@ -12,15 +12,17 @@ interface NavItem {
 }
 
 function Navbar({ children }: { children: ReactNode }) {
+    const navigate = useNavigate();
     const { isAuthenticated, permissions, logout, chosenTenantId, chooseTenant } = useAuth();
     const [profileOpen, setProfileOpen] = useState(false);
     const [tenantModalOpen, setTenantModalOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     const navItems: NavItem[] = [
-        { label: 'Issues', path: '/issues', requiresTenant: true },
-        { label: 'Tasks', path: '/tasks', requiresTenant: true },
-        { label: 'Admin', path: '/admin', requiredRole: PermissionRole.Admin },
+        { label: 'Issues', path: '/issues', action: () => { navigate("/issues")}, requiresTenant: true },
+        { label: 'Tasks', path: '/tasks', action: () => { navigate("/tasks")}, requiresTenant: true },
+        { label: 'Admin', path: '/admin', action: () => { navigate("/admin")}, requiredRole: PermissionRole.Admin },
+        { label : 'Misc', path: '/misc', action: () => { navigate("/misc")}}
     ];
 
     const canShow = (item: NavItem): boolean => {

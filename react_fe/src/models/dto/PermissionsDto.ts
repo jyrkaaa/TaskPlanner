@@ -5,6 +5,7 @@ export interface PermissionsDto {
 }
 
 export class PermissionRole {
-    public static readonly Admin = "ROLE_ADMIN"
-    public static readonly User = "ROLE_USER"
+    public static readonly Admin = "ROLE_ADMIN";
+    public static readonly User = "ROLE_USER";
+    public static readonly Unaccepted = "ROLE_UNACCEPTED";
 }

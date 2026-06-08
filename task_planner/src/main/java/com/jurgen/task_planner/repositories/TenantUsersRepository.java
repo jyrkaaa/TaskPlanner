@@ -17,4 +17,7 @@ public interface TenantUsersRepository extends JpaRepository<TenantUsersEntity, 
 
     @Query("SELECT tu FROM TenantUsersEntity tu WHERE tu.tenant.id = :tenantId")
     List<TenantUsersEntity> findAllByTenantId(@Param("tenantId") int tenantId);
+
+    @Query("SELECT tu FROM TenantUsersEntity tu WHERE tu.user.id = :userId")
+    List<TenantUsersEntity> findAllByUserId(@Param("userId") int userId);
 }

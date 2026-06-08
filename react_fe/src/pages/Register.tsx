@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
+import { useAlert } from '../context/AlertContext'
 
 interface FormErrors {
   username?: string
@@ -22,9 +24,8 @@ function validate(username: string, email: string, password: string, confirmPass
   }
   if (!password) {
     errors.password = 'Password is required'
-  } else if (password.length < 8) {
-    errors.password = 'Password must be at least 8 characters'
-  }
+  } //else if (password.length < 8) {
+    //errors.password = 'Password must be at least 8 characters'
   if (!confirmPassword) {
     errors.confirmPassword = 'Please confirm your password'
   } else if (confirmPassword !== password) {
@@ -36,6 +37,9 @@ function validate(username: string, email: string, password: string, confirmPass
 type TouchedFields = Record<'username' | 'email' | 'password' | 'confirmPassword', boolean>
 
 function RegisterPage() {
+  const { error } = useAlert();
+  const navigate = useNavigate()
+  const { register } = useAuth();
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -59,7 +63,11 @@ function RegisterPage() {
     const errs = validate(username, email, password, confirmPassword)
     setErrors(errs)
     if (Object.keys(errs).length > 0) return
-    // register logic goes here
+    register({ username, email, password }).catch(() => {
+      error('Login failed. Please check your credentials and try again.');
+    }).then(() => {
+      navigate('/');
+    });
   }
 
   function err(field: keyof TouchedFields) {

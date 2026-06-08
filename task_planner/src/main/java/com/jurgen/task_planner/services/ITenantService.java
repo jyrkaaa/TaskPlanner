@@ -9,8 +9,8 @@ import com.jurgen.task_planner.models.requests.CreateTenantRequest;
 
 public interface ITenantService {
     TenantDto getTenantById(int id) throws HttpErrorException;
-    List<TenantDto> getAll();
-    void createTenant(CreateTenantRequest request);
+    List<TenantDto> getAllLinkedTenants(int userId);
+    void createTenantAndJoinAsAdmin(CreateTenantRequest request, int creatorUserId) throws HttpErrorException;
     boolean updateTenant(TenantDto tenant, int userId) throws HttpErrorException;
     void joinTenant(int tenantId, int userId) throws HttpErrorException;
     void acceptUser(int tenantId, int targetUserId) throws HttpErrorException;

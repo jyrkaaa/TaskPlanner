@@ -1,16 +1,17 @@
 package com.jurgen.task_planner.services;
 
-import java.util.List;
-
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.jurgen.task_planner.models.dtos.HttpErrorException;
 import com.jurgen.task_planner.models.dtos.IssueDto;
+import com.jurgen.task_planner.models.dtos.PagedResponse;
 import com.jurgen.task_planner.models.entities.IssueEntity;
 import com.jurgen.task_planner.models.entities.auth.TenantEntity;
 import com.jurgen.task_planner.models.requests.CreateIssueRequest;
+import com.jurgen.task_planner.models.requests.PaginationRequest;
 import com.jurgen.task_planner.models.requests.UpdateIssueRequest;
 import com.jurgen.task_planner.repositories.IssueRepository;
 import com.jurgen.task_planner.repositories.TenantRepository;
@@ -25,10 +26,10 @@ public class IssueService implements IIssueService {
     private final TenantRepository  _tenantRepository;
 
     @Override
-    public List<IssueDto> getIssuesForTenant(int tenantId) {
-        return _issueRepository.findAllByTenantId(tenantId).stream()
-            .map(this::toDto)
-            .toList();
+    @Transactional(readOnly = true)
+    public PagedResponse<IssueDto> getIssuesForTenant(int tenantId, PaginationRequest request) {
+        var pagedResponse = PagedResponse.from(_issueRepository.findAllByTenantId(tenantId, request.toPageable(Sort.by("id").descending())), this::toDto);
+        return pagedResponse;
     }
 
     @Override
