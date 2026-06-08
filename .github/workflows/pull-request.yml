@@ -1,0 +1,26 @@
+name: Pull Request Checks
+
+on:
+  pull_request:
+    branches:
+      - main        # only PRs targeting main trigger this
+
+jobs:
+  test:
+    name: Run Java Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Run unit tests
+        working-directory: task_planner
+        run: mvn test -Dtest='!TaskPlannerApplicationTests'
