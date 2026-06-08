@@ -12,3 +12,7 @@ FE: React.js | 19.2.6 && Vite 8.0.12
 BE: Java | OpenJDK 21.0.2 | Spring Boot	4.0.6
 Application is run from one container currently with Docker.
 Reverse proxy to be added, nginx probably.
+
+### CI-CD
+PR-s to master run BE Unit tests
+No furter actions in pipeline as project isn't currently hosted anywhere.
