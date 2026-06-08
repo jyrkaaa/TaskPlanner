@@ -15,5 +15,36 @@ services:
       timeout: 5s
       retries: 5
 
+  backend:
+    build:
+      context: ./task_planner
+      dockerfile: Dockerfile
+    container_name: task_planner_backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://task_planner_db:5432/task_planner
+      SPRING_DATASOURCE_USERNAME: task_planner
+      SPRING_DATASOURCE_PASSWORD: task_planner
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./react_fe
+      dockerfile: Dockerfile
+    container_name: task_planner_frontend
+    environment:
+      BACKEND_URL: http://backend:8080
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./react_fe/src:/app/src
+      - ./react_fe/public:/app/public
+      - ./react_fe/index.html:/app/index.html
+    depends_on:
+      - backend
+
 volumes:
   postgres_data:
