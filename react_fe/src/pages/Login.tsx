@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { AuthRequest } from '../models/dto/AuthRequest'
 import { useAlert } from '../context/AlertContext';
+import ThemeToggleButton from '../components/ThemeToggleButton';
 
 interface FormErrors {
   email?: string;
@@ -60,7 +61,10 @@ function LoginPage() {
   return (
     <div style={styles.page}>
       <div style={styles.card}>
-        <h2 style={styles.title}>Welcome back</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2 style={styles.title}>Welcome back</h2>
+          <ThemeToggleButton />
+        </div>
         <p style={styles.subtitle}>Sign in to your account</p>
 
         <form onSubmit={handleSubmit} noValidate style={styles.form}>
