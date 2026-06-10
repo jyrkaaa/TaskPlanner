@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useAlert } from '../context/AlertContext'
+import ThemeToggleButton from '../components/ThemeToggleButton'
 
 interface FormErrors {
   username?: string
@@ -77,7 +78,10 @@ function RegisterPage() {
   return (
     <div style={styles.page}>
       <div style={styles.card}>
-        <h2 style={styles.title}>Create an account</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2 style={styles.title}>Create an account</h2>
+          <ThemeToggleButton />
+        </div>
         <p style={styles.subtitle}>Get started with Task Planner</p>
 
         <form onSubmit={handleSubmit} noValidate style={styles.form}>

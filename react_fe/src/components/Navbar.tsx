@@ -2,6 +2,7 @@ import { ReactNode, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { PermissionRole } from "../models/dto/PermissionsDto";
+import ThemeToggleButton from "./ThemeToggleButton";
 
 interface NavItem {
     label: string;
@@ -80,6 +81,7 @@ function Navbar({ children }: { children: ReactNode }) {
                                 </div>
                             )}
                         </div>
+                        <ThemeToggleButton />
                         <button className="navbar-logout" onClick={logout}>Logout</button>
                     </div>
                 </nav>
